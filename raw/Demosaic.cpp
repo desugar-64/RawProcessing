@@ -93,29 +93,29 @@ void Demosaic::interpolateGRBG() {
 
     // G component
     float k4[] = {
-            1./5, 0., 1./5,
-            0., 1./5, 0.,
-            1./5, 0., 1./5
+            1. / 5, 0., 1. / 5,
+            0., 1. / 5, 0.,
+            1. / 5, 0., 1. / 5
     };
 
     // R component
     float k1[] = {
-            0., 1./2, 0.,
+            0., 1. / 2, 0.,
             0., 0., 0.,
-            0., 1./2, 0.
+            0., 1. / 2, 0.
     };
 
     // B component
     float k2[] = {
             0., 0., 0.,
-            1./2, 0., 1./2,
+            1. / 2, 0., 1. / 2,
             0., 0., 0.
     };
 
-    float k3[] {
-            1./4., 0., 1./4.,
+    float k3[]{
+            1. / 4., 0., 1. / 4.,
             0., 0., 0.,
-            1./4., 0., 1./4.
+            1. / 4., 0., 1. / 4.
     };
 
     Mat kernel1 = Mat(3, 3, CV_32F, k1);
@@ -150,7 +150,7 @@ void Demosaic::interpolateGRBG() {
 //    filter2D(g, g2, -1, kernel1);
     filter2D(g, g3, -1, kernel2);
 //    filter2D(g, g4, -1, kernel4);
-    g = (g + g2 + g3 + g4)/2.;
+    g = (g + g2 + g3 + g4) / 2.;
 
 }
 
@@ -201,7 +201,7 @@ void Demosaic::interpolateSimple() {
     filter2D(g, g2_, -1, gKernel);
     filter2D(g, g3_, -1, rKernel);
     filter2D(g, g4_, -1, bKernel);
-    g = (g + g2_ + g3_ + g4_) * 1/4.;
+    g = (g + g2_ + g3_ + g4_) * 1 / 4.;
 
     filter2D(b, b2_, -1, bKernel);
     filter2D(b, b3_, -1, rKernel);

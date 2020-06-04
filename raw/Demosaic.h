@@ -24,18 +24,28 @@ private:
     cv::Mat demosaicImage;
     cv::Mat colorImage;
     cv::Mat result;
+
     static std::string getCfaPatternString(LibRaw *processor);
+
     CfaPattern getCfaPattern(LibRaw *processor);
+
     static cv::Mat getColorCorrectionMatrix(LibRaw *processor);
 
 public:
     explicit Demosaic(const char *filePath, const char *originalImgPath);
+
     void generateRGBComponents();
+
     void interpolateGRBG();
+
     void interpolateSimple();
+
     void colorize();
+
     void squaredDifference();
+
     void modifiedInterpolation();
+
     void display();
 };
 
