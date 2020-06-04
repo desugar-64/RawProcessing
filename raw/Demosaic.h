@@ -1,0 +1,42 @@
+//
+// Created by sergeyfitis on 03.06.20.
+//
+
+#ifndef TESTLIBRAW_DEMOSAIC_H
+#define TESTLIBRAW_DEMOSAIC_H
+
+#include "string"
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+#include "libraw/libraw.h"
+#include "CfaPattern.h"
+
+class Demosaic {
+private:
+    LibRaw libRaw;
+    cv::Mat image;
+    cv::Mat r;
+    cv::Mat g;
+    cv::Mat b;
+    int rows;
+    int cols;
+    cv::Mat demosaicImage;
+    cv::Mat colorImage;
+    cv::Mat result;
+    static std::string getCfaPatternString(LibRaw *processor);
+    CfaPattern getCfaPattern(LibRaw *processor);
+    static cv::Mat getColorCorrectionMatrix(LibRaw *processor);
+
+public:
+    explicit Demosaic(const char *filePath, const char *originalImgPath);
+    void generateRGBComponents();
+    void interpolateGRBG();
+    void interpolateSimple();
+    void colorize();
+    void squaredDifference();
+    void modifiedInterpolation();
+    void display();
+};
+
+#endif //TESTLIBRAW_DEMOSAIC_H
