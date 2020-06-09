@@ -4,11 +4,9 @@
 using namespace cv;
 
 void processRaw() {
-    Demosaic demosaic("~/raw/flower.dng", "~/raw/flower_orig.jpg");
+    Demosaic demosaic("/home/sergeyfitis/raw/flower.dng", "/home/sergeyfitis/raw/flower_orig.jpg");
     demosaic.generateRGBComponents();
     demosaic.interpolateGRBG();
-//        demosaic.modifiedInterpolation();
-//        demosaic.interpolateSimple();
     demosaic.colorize();
     demosaic.squaredDifference();
     demosaic.display();

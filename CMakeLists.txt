@@ -10,7 +10,7 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        main.cpp raw/CfaPattern.h raw/Demosaic.cpp raw/Demosaic.h)
+        main.cpp raw/filter/FilterFactory.h raw/CfaPattern.h raw/Demosaic.cpp raw/Demosaic.h raw/filter/Filter.h raw/filter/FilterGRBG.cpp raw/filter/FilterGRBG.h)
 
 add_library(libraw
         SHARED
@@ -27,7 +27,7 @@ set_target_properties( # Specifies the target library.
 
 add_library(libopencv_java430
         SHARED
-        IMPORTED raw/Demosaic.cpp raw/Demosaic.h)
+        IMPORTED)
 
 
 set_target_properties( # Specifies the target library.
@@ -40,6 +40,6 @@ set_target_properties( # Specifies the target library.
         /home/sergeyfitis/dev/cpp-projects/opencv-4.3.0/build/lib/libopencv_java430.so)
 
 
-add_executable(RawProcessing main.cpp raw/CfaPattern.h raw/Demosaic.cpp raw/Demosaic.h)
-target_link_libraries(RawProcessing libraw libopencv_java430 )
+add_executable(RawProcessing main.cpp raw/filter/FilterFactory.h raw/CfaPattern.h raw/Demosaic.cpp raw/Demosaic.h raw/Demosaic.h raw/filter/Filter.h raw/filter/FilterGRBG.cpp raw/filter/FilterGRBG.h)
+target_link_libraries(RawProcessing libraw libopencv_java430)
 

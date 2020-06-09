@@ -11,24 +11,18 @@
 #include "opencv2/imgproc.hpp"
 #include "libraw/libraw.h"
 #include "CfaPattern.h"
+#include "filter/Filter.h"
 
 class Demosaic {
 private:
-    LibRaw libRaw;
-    cv::Mat image;
-    cv::Mat r;
-    cv::Mat g;
-    cv::Mat b;
-    int rows;
-    int cols;
+    LibRaw *libRaw;
+    Filter *bayerFilter;
     cv::Mat demosaicImage;
     cv::Mat colorImage;
     cv::Mat result;
 
     static std::string getCfaPatternString(LibRaw *processor);
-
-    CfaPattern getCfaPattern(LibRaw *processor);
-
+    static CfaPattern getCfaPattern(LibRaw *processor);
     static cv::Mat getColorCorrectionMatrix(LibRaw *processor);
 
 public:
@@ -38,13 +32,9 @@ public:
 
     void interpolateGRBG();
 
-    void interpolateSimple();
-
     void colorize();
 
     void squaredDifference();
-
-    void modifiedInterpolation();
 
     void display();
 };
