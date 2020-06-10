@@ -91,6 +91,7 @@ void FilterGRBG::interpolate() {
             1. / 4., 0., 1. / 4.
     };
 
+
     Mat kernel1 = Mat(3, 3, CV_32F, k1);
     Mat kernel2 = Mat(3, 3, CV_32F, k2);
     Mat kernel3 = Mat(3, 3, CV_32F, k3);

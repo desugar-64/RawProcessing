@@ -10,7 +10,7 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        main.cpp raw/filter/FilterFactory.h raw/CfaPattern.h raw/Demosaic.cpp raw/Demosaic.h raw/filter/Filter.h raw/filter/FilterGRBG.cpp raw/filter/FilterGRBG.h)
+        main.cpp raw/filter/FilterFactory.h raw/CfaPattern.h raw/Demosaic.cpp raw/Demosaic.h raw/filter/Filter.h raw/filter/FilterGRBG.cpp raw/filter/FilterGRBG.h align/Align.h)
 
 add_library(libraw
         SHARED
