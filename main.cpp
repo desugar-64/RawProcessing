@@ -18,15 +18,33 @@ void processRaw() {
 int main() {
 //    processRaw();
     std::cout << "Ok!" << std::endl;
-    Mat rect1 = imread("rect1.png", IMREAD_GRAYSCALE);
-    Mat rect2 = imread("rect2.png", IMREAD_GRAYSCALE);
+    Mat base = imread("../align_test/flower_base.png", IMREAD_GRAYSCALE);
+    Mat shifted = imread("../align_test/flower_shifted.png", IMREAD_GRAYSCALE);
+    int width = base.cols;
+    int height = base.rows;
 
-    double a = compare(rect1, rect2);
-    
-    cv::namedWindow("rect1", CV_WINDOW_FREERATIO);
-    cv::namedWindow("rect2", CV_WINDOW_FREERATIO);
-    cv::imshow("rect1", rect1);
-    cv::imshow("rect2", rect2);
+    int searchSize = 120;
+    const Point2i shiftOffset = comparePyramidLayer(
+            base,
+            shifted,
+            0,
+            Range(-1 * searchSize, 1 * searchSize),
+            Range(-1 * searchSize, 1 * searchSize)
+    );
+
+    Mat correction = translateImg(shifted, shiftOffset.x, shiftOffset.y);
+    Mat aligned;
+    cv::addWeighted(base, 0.5, correction, 0.5, 0., aligned);
+
+//    compare(base, shifted, -100, -60);
+
+
+    cv::namedWindow("base", CV_WINDOW_FREERATIO);
+    cv::namedWindow("shifted", CV_WINDOW_FREERATIO);
+    cv::namedWindow("aligned", CV_WINDOW_FREERATIO);
+    cv::imshow("base", base);
+    cv::imshow("shifted", shifted);
+    cv::imshow("aligned", aligned);
 
     cv::waitKey(0);
     return 0;
