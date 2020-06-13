@@ -18,12 +18,14 @@ void processRaw() {
 int main() {
 //    processRaw();
     std::cout << "Ok!" << std::endl;
-    Mat base = imread("../align_test/flower_base.png", IMREAD_GRAYSCALE);
-    Mat shifted = imread("../align_test/flower_shifted.png", IMREAD_GRAYSCALE);
+    Mat base = imread("../align_test/bike_base.png", IMREAD_GRAYSCALE);
+    Mat baseColor = imread("../align_test/bike_base.png", IMREAD_COLOR);
+    Mat shifted = imread("../align_test/bike_shifted.png", IMREAD_GRAYSCALE);
+    Mat shiftedColor = imread("../align_test/bike_shifted.png", IMREAD_COLOR);
     int width = base.cols;
     int height = base.rows;
 
-    int searchSize = 120;
+    /*int searchSize = 120;
     const Point2i shiftOffset = comparePyramidLayer(
             base,
             shifted,
@@ -38,14 +40,28 @@ int main() {
 
 //    compare(base, shifted, -100, -60);
 
-
     cv::namedWindow("base", CV_WINDOW_FREERATIO);
     cv::namedWindow("shifted", CV_WINDOW_FREERATIO);
     cv::namedWindow("aligned", CV_WINDOW_FREERATIO);
     cv::imshow("base", base);
     cv::imshow("shifted", shifted);
-    cv::imshow("aligned", aligned);
+    cv::imshow("aligned", aligned);*/
 
+    const Point2i &alignment = align(base, shifted);
+    auto xAlignment = alignment.x;
+    auto yAlignment = alignment.y;
+    Mat corrected = translateImg(shiftedColor, xAlignment, yAlignment);
+    namedWindow("corrected", WINDOW_NORMAL);
+    namedWindow("aligned", WINDOW_NORMAL);
+    Mat aligned;
+    addWeighted(baseColor, 0.5, corrected, 0.5, 0, aligned);
+    imshow("aligned", aligned);
+
+    Mat noAlign;
+    addWeighted(baseColor, 0.5, shiftedColor, 0.5, 0, noAlign);
+    imshow("corrected", corrected);
+    imwrite("no_align.png", noAlign);
+    imwrite("align.png", aligned);
     cv::waitKey(0);
     return 0;
 }
