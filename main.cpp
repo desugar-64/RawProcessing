@@ -7,7 +7,7 @@
 using namespace cv;
 
 void processRaw() {
-    Demosaic demosaic("/home/sergeyfitis/raw/flower.dng", "/home/sergeyfitis/raw/flower_orig.jpg");
+    Demosaic demosaic("/home/sergeyfitis/raw/flower.dng", "/home/sergeyfitis/raw/wall_orig.jpg");
     demosaic.generateRGBComponents();
     demosaic.interpolateGRBG();
     demosaic.colorize();
@@ -18,38 +18,15 @@ void processRaw() {
 int main() {
 //    processRaw();
     std::cout << "Ok!" << std::endl;
-    Mat base = imread("../align_test/bike_base.png", IMREAD_GRAYSCALE);
-    Mat baseColor = imread("../align_test/bike_base.png", IMREAD_COLOR);
-    Mat shifted = imread("../align_test/bike_shifted.png", IMREAD_GRAYSCALE);
-    Mat shiftedColor = imread("../align_test/bike_shifted.png", IMREAD_COLOR);
-    int width = base.cols;
-    int height = base.rows;
+    Mat base = imread("../align_test/wall_base.png", IMREAD_GRAYSCALE);
+    Mat baseColor = imread("../align_test/wall_base.png", IMREAD_COLOR);
+    Mat shifted = imread("../align_test/wall_shifted.png", IMREAD_GRAYSCALE);
+    Mat shiftedColor = imread("../align_test/wall_shifted.png", IMREAD_COLOR);
 
-    /*int searchSize = 120;
-    const Point2i shiftOffset = comparePyramidLayer(
-            base,
-            shifted,
-            0,
-            Range(-1 * searchSize, 1 * searchSize),
-            Range(-1 * searchSize, 1 * searchSize)
-    );
-
-    Mat correction = translateImg(shifted, shiftOffset.x, shiftOffset.y);
-    Mat aligned;
-    cv::addWeighted(base, 0.5, correction, 0.5, 0., aligned);
-
-//    compare(base, shifted, -100, -60);
-
-    cv::namedWindow("base", CV_WINDOW_FREERATIO);
-    cv::namedWindow("shifted", CV_WINDOW_FREERATIO);
-    cv::namedWindow("aligned", CV_WINDOW_FREERATIO);
-    cv::imshow("base", base);
-    cv::imshow("shifted", shifted);
-    cv::imshow("aligned", aligned);*/
-
-    const Point2i &alignment = align(base, shifted);
+    const Point2d &alignment = align(base, shifted);
     auto xAlignment = alignment.x;
     auto yAlignment = alignment.y;
+
     Mat corrected = translateImg(shiftedColor, xAlignment, yAlignment);
     namedWindow("corrected", WINDOW_NORMAL);
     namedWindow("aligned", WINDOW_NORMAL);
@@ -62,6 +39,7 @@ int main() {
     imshow("corrected", corrected);
     imwrite("no_align.png", noAlign);
     imwrite("align.png", aligned);
+
     cv::waitKey(0);
     return 0;
 }
