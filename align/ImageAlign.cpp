@@ -1,22 +1,13 @@
 //
-// Created by sergeyfitis on 11.06.20.
+// Created by sergeyfitis on 15.06.20.
 //
 
-#define PYRAMID_LAYERS 3
-#define T_SIZE 32           // Size of a tile in the bayer mosaiced image
-#define T_SIZE_2 16         // Half of T_SIZE and the size of a tile throughout the alignment pyramid
-
-#define MIN_OFFSET -168     // Min total alignment (based on three levels and downsampling by 4)
-#define MAX_OFFSET 126      // Max total alignment. Differs from MIN_OFFSET because total search range is 8 for better vectorization
-
-#define DOWNSAMPLE_RATE_PER_LEVEL 4   // Rate at which layers of the alignment pyramid are downsampled relative to each other
-
-#include "opencv2/opencv.hpp"
+#include "ImageAlign.h"
 
 using namespace cv;
 using namespace std;
 
-vector<Mat> gaussianPyramid(Mat &base) {
+std::vector<cv::Mat> ImageAlign::gaussianPyramid(cv::Mat &base) {
     vector<Mat> pyramid;
     pyramid.push_back(base);
     Mat pyrLayer = base;
@@ -33,7 +24,7 @@ vector<Mat> gaussianPyramid(Mat &base) {
     return pyramid;
 }
 
-Mat translateImg(Mat &img, double xOffset, double yOffset) {
+cv::Mat ImageAlign::translateImg(Mat &img, double xOffset, double yOffset) {
     Mat out;
     Mat transMat = (Mat_<double>(2, 3) << 1, 0, xOffset, 0, 1, yOffset);
     warpAffine(img, out, transMat, img.size());
@@ -44,36 +35,25 @@ Mat translateImg(Mat &img, double xOffset, double yOffset) {
     return out;
 }
 
-Point2d shiftFFT(const cv::Mat &source, const cv::Mat &target, bool bUseHanningWindow) {
-    CV_Assert(source.type() == CV_32FC1);
-    CV_Assert(target.type() == CV_32FC1);
+cv::Point2d ImageAlign::shiftByPhaseCorrelation(const Mat &base, const Mat &layer, bool bUseHanningWindow) {
+    CV_Assert(layer.type() == CV_32FC1);
+    CV_Assert(base.type() == CV_32FC1);
 
     Point2d shift;
     if (bUseHanningWindow) {
         Mat hann;
-        createHanningWindow(hann, source.size(), CV_32F);
-        shift = phaseCorrelate(source, target, hann);
+        createHanningWindow(hann, layer.size(), CV_32F);
+        shift = phaseCorrelate(layer, base, hann);
     } else {
-        shift = phaseCorrelate(source, target);
+        shift = phaseCorrelate(layer, base);
     }
 
     cout << "Detected shift: " << shift << endl;
 
-//    Mat H = (Mat_<float>(2, 3) << 1.0, 0.0, shift.x, 0.0, 1.0, shift.y);
-
-//    Mat res;
-//    warpAffine(source, res, H, target.size());
-
-//    CV_Assert(res.size() == target.size());
-//    CV_Assert(res.type() == CV_32FC1);
-
     return shift;
 }
 
-/*
- * returns size of difference between two grayscale frames
- * */
-static double compare(Mat &base, Mat &other, int xOffset, int yOffset) {
+double ImageAlign::compare(Mat &base, Mat &other, int xOffset, int yOffset) {
     assert(base.channels() == 1); // image must be grayscale
     assert(other.channels() == 1);
 
@@ -91,36 +71,32 @@ static double compare(Mat &base, Mat &other, int xOffset, int yOffset) {
     return sum(meanValue).val[0];
 }
 
-static Point2d
-comparePyramidLayerFFT(Mat &base, Mat &layer, int layerNumber, double prevAlignmentX, double prevAlignmentY) {
-
-    std::printf("comparePyramidLayer=%d, (%d)x(%d)\n", layerNumber, base.cols, base.rows);
-    Point2d alignShift;
+cv::Point2d ImageAlign::comparePyramidLayerFFT(Mat &base, Mat &layer, int layerNumber, double prevAlignmentX,
+                                               double prevAlignmentY) {
+    std::printf("comparePyramidLayerFFT=%d, %dx%d\n", layerNumber, base.cols, base.rows);
+    Point2d alignmentShift;
 
     Mat base32F;
     Mat layer32F;
     Mat shiftLayer = translateImg(layer, prevAlignmentX, prevAlignmentY);
     base.convertTo(base32F, CV_32FC1);
     shiftLayer.convertTo(layer32F, CV_32FC1);
-    const Point2d point = shiftFFT(layer32F, base32F, true);
-    alignShift.x = point.x;
-    alignShift.y = point.y;
-//    std::printf("minAlignmentError=%f\n", minAlignmentError);
-    cout << "Detected shift: " << alignShift << endl;
+    const Point2d point = shiftByPhaseCorrelation(base32F, layer32F, true);
+    alignmentShift.x = point.x;
+    alignmentShift.y = point.y;
+    cout << "Detected shift: " << alignmentShift << endl;
     std::printf("--------------------------\n");
-    return alignShift;
+    return alignmentShift;
 }
 
-
-static Point2i
-comparePyramidLayer(Mat &base, Mat &layer, int layerNumber, Range xSearchRange, Range ySearchRange, int prevAlignmentX,
-                    int prevAlignmentY) {
-
-    std::printf("comparePyramidLayer=%d, (%d)x(%d)\n", layerNumber, base.cols, base.rows);
-    Point2i *alignShift = nullptr;
+cv::Point2i
+ImageAlign::comparePyramidLayer(Mat &base, Mat &layer, int layerNumber, cv::Range xSearchRange, cv::Range ySearchRange,
+                                int prevAlignmentX, int prevAlignmentY) {
+    std::printf("comparePyramidLayer=%d, %dx%d\n", layerNumber, base.cols, base.rows);
+    Point2i *alignmentShift = nullptr;
     double minAlignmentError = std::numeric_limits<double>::max();
     int doneIterations = 0;
-    int multipleOf = 10;
+    int multipleOf = COMPARE_EVERY_N_PIXEL;
     for (int x = xSearchRange.start; x <= xSearchRange.end; x++) {
         for (int y = ySearchRange.start; y < ySearchRange.end; y++) {
             if (x % multipleOf != 0 && y % multipleOf != 0) {
@@ -128,27 +104,30 @@ comparePyramidLayer(Mat &base, Mat &layer, int layerNumber, Range xSearchRange, 
             }
 
             doneIterations++;
-            if (alignShift == nullptr) {
+            if (alignmentShift == nullptr) {
                 auto align = Point2i(x, y);
-                alignShift = &align;
+                alignmentShift = &align;
             }
             double alignmentError = compare(base, layer, x + prevAlignmentX, y + prevAlignmentY);
             if (alignmentError < minAlignmentError) {
                 minAlignmentError = alignmentError;
-                alignShift->x = x + prevAlignmentX;
-                alignShift->y = y + prevAlignmentY;
+                alignmentShift->x = x + prevAlignmentX;
+                alignmentShift->y = y + prevAlignmentY;
             }
         }
     }
-    std::printf("doneIterations=%d on layer=%d\n", doneIterations, layerNumber);
+    std::printf("processed %d iterations on layer=%d\n", doneIterations, layerNumber);
     std::printf("minAlignmentError=%f\n", minAlignmentError);
-    std::printf("alignOffset=(%d)x(%d)\n", alignShift->x, alignShift->y);
+    cout << "alignmentShift: " << alignmentShift << endl;
     std::printf("--------------------------\n");
-    return *alignShift;
+    return *alignmentShift;
 }
 
+std::vector<Tile> ImageAlign::generateTilesForLayer(int layerNumber, Mat &layer) {
+    return std::vector<Tile>();
+}
 
-Point2d align(Mat &base, Mat &shifted) {
+cv::Point2d ImageAlign::align(Mat &base, Mat &shifted) {
     auto start = std::chrono::high_resolution_clock::now();
 
     auto basePyr = gaussianPyramid(base);
