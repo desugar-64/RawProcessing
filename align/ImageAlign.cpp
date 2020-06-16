@@ -7,13 +7,17 @@
 using namespace cv;
 using namespace std;
 
-std::vector<cv::Mat> ImageAlign::gaussianPyramid(cv::Mat &base) {
-    vector<Mat> pyramid;
-    pyramid.push_back(base);
+std::vector<PyramidLayer> ImageAlign::gaussianPyramid(cv::Mat &base) {
+    vector<PyramidLayer> pyramid;
+    PyramidLayer layer0 = PyramidLayer(base, 0);
+    layer0.generateTiles();
+    pyramid.push_back(layer0);
     Mat pyrLayer = base;
-    for (int layer = 0; layer < PYRAMID_LAYERS; layer++) {
+    for (int layer = 1; layer < PYRAMID_LAYERS; layer++) {
         pyrDown(pyrLayer, pyrLayer);
-        pyramid.push_back(pyrLayer);
+        PyramidLayer layerN = PyramidLayer(pyrLayer, layer);
+        layerN.generateTiles();
+        pyramid.push_back(layerN);
     }
 //    for (int i = 0; i < pyramid.size(); i++) {
 //        Mat mat = pyramid[i];
@@ -90,13 +94,21 @@ cv::Point2d ImageAlign::comparePyramidLayerFFT(Mat &base, Mat &layer, int layerN
 }
 
 cv::Point2i
-ImageAlign::comparePyramidLayer(Mat &base, Mat &layer, int layerNumber, cv::Range xSearchRange, cv::Range ySearchRange,
+ImageAlign::comparePyramidLayer(PyramidLayer &base, PyramidLayer &layer, cv::Range xSearchRange, cv::Range ySearchRange,
                                 int prevAlignmentX, int prevAlignmentY) {
-    std::printf("comparePyramidLayer=%d, %dx%d\n", layerNumber, base.cols, base.rows);
+
+    std::printf("comparePyramidLayer=%d, %dx%d\n", base.number, base.layer.cols, base.layer.rows);
     Point2i *alignmentShift = nullptr;
     double minAlignmentError = std::numeric_limits<double>::max();
     int doneIterations = 0;
     int multipleOf = COMPARE_EVERY_N_PIXEL;
+
+    auto iterateTiles = [](Tile &tile) {
+        // TODO
+    };
+
+    for_each(base.tiles.begin(), base.tiles.end(), iterateTiles);
+
     for (int x = xSearchRange.start; x <= xSearchRange.end; x++) {
         for (int y = ySearchRange.start; y < ySearchRange.end; y++) {
             if (x % multipleOf != 0 && y % multipleOf != 0) {
@@ -108,7 +120,7 @@ ImageAlign::comparePyramidLayer(Mat &base, Mat &layer, int layerNumber, cv::Rang
                 auto align = Point2i(x, y);
                 alignmentShift = &align;
             }
-            double alignmentError = compare(base, layer, x + prevAlignmentX, y + prevAlignmentY);
+            double alignmentError = compare(base.layer, layer.layer, x + prevAlignmentX, y + prevAlignmentY);
             if (alignmentError < minAlignmentError) {
                 minAlignmentError = alignmentError;
                 alignmentShift->x = x + prevAlignmentX;
@@ -116,15 +128,11 @@ ImageAlign::comparePyramidLayer(Mat &base, Mat &layer, int layerNumber, cv::Rang
             }
         }
     }
-    std::printf("processed %d iterations on layer=%d\n", doneIterations, layerNumber);
+    std::printf("processed %d iterations on layer=%d\n", doneIterations, base.number);
     std::printf("minAlignmentError=%f\n", minAlignmentError);
-    cout << "alignmentShift: " << alignmentShift << endl;
+    cout << "alignmentShift: " << *alignmentShift << endl;
     std::printf("--------------------------\n");
     return *alignmentShift;
-}
-
-std::vector<Tile> ImageAlign::generateTilesForLayer(int layerNumber, Mat &layer) {
-    return std::vector<Tile>();
 }
 
 cv::Point2d ImageAlign::align(Mat &base, Mat &shifted) {
@@ -142,7 +150,6 @@ cv::Point2d ImageAlign::align(Mat &base, Mat &shifted) {
 
     auto initialAlignment = comparePyramidLayer(basePyr[basePyr.size() - 1],
                                                 shiftedPyr[shiftedPyr.size() - 1],
-                                                basePyr.size() - 1,
                                                 xSearchRange,
                                                 ySearchRange,
                                                 xAlignment,
@@ -171,7 +178,6 @@ cv::Point2d ImageAlign::align(Mat &base, Mat &shifted) {
         ySearchRange.end = 1 * (minSearchDistance * scale);
         Point2i alignOffset = comparePyramidLayer(baseLayer,
                                                   shiftedLayer,
-                                                  layer,
                                                   xSearchRange,
                                                   ySearchRange,
                                                   xAlignment,
@@ -198,6 +204,6 @@ cv::Point2d ImageAlign::align(Mat &base, Mat &shifted) {
 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::printf("duration=%ld.ms\n", duration.count()/1000);
+    std::printf("duration=%ld.ms\n", duration.count() / 1000);
     return {xAlignment, yAlignment};
 }

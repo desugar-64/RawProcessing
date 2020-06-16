@@ -11,9 +11,9 @@ class Tile {
 public:
     cv::Rect2i rect;
     cv::Rect2i alignmentOffset;
-    double alignmentError;
+    double alignmentError = 0.;
 
-    explicit Tile(cv::Rect2i &rect, cv::Rect2i &alignmentOffset, double alignmentError);
+    explicit Tile(cv::Rect2i &rect);
 };
 
 #endif //RAWPROCESSING_TILE_H

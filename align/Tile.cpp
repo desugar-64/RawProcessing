@@ -3,8 +3,6 @@
 //
 #include "Tile.h"
 
-Tile::Tile(cv::Rect2i &rect, cv::Rect2i &alignmentOffset, double alignmentError) {
+Tile::Tile(cv::Rect2i &rect) {
     this->rect = rect;
-    this->alignmentOffset = alignmentOffset;
-    this->alignmentError = alignmentError;
 }

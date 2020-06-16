@@ -5,7 +5,7 @@
 #ifndef RAWPROCESSING_IMAGEALIGN_H
 #define RAWPROCESSING_IMAGEALIGN_H
 
-#define PYRAMID_LAYERS 3
+#define PYRAMID_LAYERS 4
 #define COMPARE_EVERY_N_PIXEL 10
 #define BASE_SEARCH_DISTANCE 10
 #define T_SIZE 32           // Size of a tile in the bayer mosaiced image
@@ -18,10 +18,11 @@
 
 #include "opencv2/opencv.hpp"
 #include "Tile.h"
+#include "PyramidLayer.h"
 
 class ImageAlign {
 private:
-    std::vector<cv::Mat> gaussianPyramid(cv::Mat &base);
+    std::vector<PyramidLayer> gaussianPyramid(cv::Mat &base);
 
     cv::Point2d shiftByPhaseCorrelation(const cv::Mat &source, const cv::Mat &target, bool bUseHanningWindow);
 
@@ -32,7 +33,7 @@ private:
                            double prevAlignmentY);
 
     cv::Point2i
-    comparePyramidLayer(cv::Mat &base, cv::Mat &layer, int layerNumber, cv::Range xSearchRange, cv::Range ySearchRange,
+    comparePyramidLayer(PyramidLayer &base, PyramidLayer &layer, cv::Range xSearchRange, cv::Range ySearchRange,
                         int prevAlignmentX,
                         int prevAlignmentY);
 
