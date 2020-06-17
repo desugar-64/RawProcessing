@@ -2,6 +2,7 @@
 // Created by sergeyfitis on 15.06.20.
 //
 
+#include <opencv2/imgproc/types_c.h>
 #include "ImageAlign.h"
 
 using namespace cv;
@@ -28,14 +29,18 @@ std::vector<PyramidLayer> ImageAlign::gaussianPyramid(cv::Mat &base) {
     return pyramid;
 }
 
-cv::Mat ImageAlign::translateImg(Mat &img, double xOffset, double yOffset) {
+cv::Mat ImageAlign::translateImg(Mat &img, int xOffset, int yOffset) {
     Mat out;
     Mat transMat = (Mat_<double>(2, 3) << 1, 0, xOffset, 0, 1, yOffset);
-    warpAffine(img, out, transMat, img.size());
+    warpAffine(img, out, transMat, img.size(), CV_INTER_LINEAR, BORDER_CONSTANT, Scalar());
+// You can try more different parameters
+//    warpAffine(img, out, M, dsize, CV_INTER_LINEAR, BORDER_TRANSPARENT, Scalar());
+
 
 //    const String winname = format("out=%dx%d", xOffset, yOffset);
 //    namedWindow(winname, WINDOW_NORMAL);
 //    imshow(winname, out);
+//    waitKey(0);
     return out;
 }
 
@@ -52,12 +57,12 @@ cv::Point2d ImageAlign::shiftByPhaseCorrelation(const Mat &base, const Mat &laye
         shift = phaseCorrelate(layer, base);
     }
 
-    cout << "Detected shift: " << shift << endl;
+//    cout << "Detected shift: " << shift << endl;
 
     return shift;
 }
 
-double ImageAlign::compare(Mat &base, Mat &other, int xOffset, int yOffset) {
+double ImageAlign::compare(Mat &base, Mat &other, double xOffset, double yOffset) {
     assert(base.channels() == 1); // image must be grayscale
     assert(other.channels() == 1);
 
@@ -75,9 +80,10 @@ double ImageAlign::compare(Mat &base, Mat &other, int xOffset, int yOffset) {
     return sum(meanValue).val[0];
 }
 
-cv::Point2d ImageAlign::comparePyramidLayerFFT(Mat &base, Mat &layer, int layerNumber, double prevAlignmentX,
+cv::Point2d ImageAlign::comparePyramidLayerFFT(Mat &base,
+                                               Mat &layer,
+                                               double prevAlignmentX,
                                                double prevAlignmentY) {
-    std::printf("comparePyramidLayerFFT=%d, %dx%d\n", layerNumber, base.cols, base.rows);
     Point2d alignmentShift;
 
     Mat base32F;
@@ -88,21 +94,29 @@ cv::Point2d ImageAlign::comparePyramidLayerFFT(Mat &base, Mat &layer, int layerN
     const Point2d point = shiftByPhaseCorrelation(base32F, layer32F, true);
     alignmentShift.x = point.x;
     alignmentShift.y = point.y;
-    cout << "Detected shift: " << alignmentShift << endl;
-    std::printf("--------------------------\n");
+//    cout << "Detected shift: " << alignmentShift << endl;
+//    std::printf("--------------------------\n");
     return alignmentShift;
 }
 
 void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
                                      PyramidLayer &base,
-                                     PyramidLayer &shifted) {
+                                     PyramidLayer &shifted,
+                                     bool useFFT) {
 
     CV_Assert(base.tiles.size() == shifted.tiles.size());
     CV_Assert(base.tiles[0].rect.width == shifted.tiles[0].rect.width);
     CV_Assert(base.tiles[0].rect.height == shifted.tiles[0].rect.height);
 
-    std::printf("comparePyramidLayer=%d, %dx%d\n", base.number, base.layer.cols, base.layer.rows);
-    Point2i alignmentShift(0, 0);
+    if (shifted.number < PYRAMID_LAYERS - 1) {
+        CV_Assert(shifted.number < previousShiftedLayer.number);
+    }
+
+
+    const double maxDouble = std::numeric_limits<double>::max();
+
+    std::printf("comparePyramidLayer=%d, %dx%d, useFFT=%d\n", base.number, base.layer.cols, base.layer.rows, useFFT);
+    Point2d alignmentShift(maxDouble, maxDouble);
     int doneIterations = 0;
     int multipleOf = COMPARE_EVERY_N_PIXEL;
 
@@ -113,42 +127,45 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
         auto &baseLayerTile = base.tiles[tileIndex];
         auto &shiftedLayerTile = shifted.tiles[tileIndex];
 
-        double minAlignmentError = std::numeric_limits<double>::max();
+        double minAlignmentError = maxDouble;
 
-        auto tileSearchRange = min(baseLayerTile.rect.width, ALIGN_SEARCH_DISTANCE);
-        searchRange.start = -tileSearchRange;
-        searchRange.end = tileSearchRange;
 
-        int prevShiftedLayerTileAlignX = previousShiftedLayerTile.alignmentOffset.x * 2;
-        int prevShiftedLayerTileAlignY = previousShiftedLayerTile.alignmentOffset.y * 2;
+        double prevShiftedLayerTileAlignX = previousShiftedLayerTile.alignmentOffset.x * 2;
+        double prevShiftedLayerTileAlignY = previousShiftedLayerTile.alignmentOffset.y * 2;
 
         auto baseTileMat = base.layer(baseLayerTile.rect);
         auto shiftedTileMat = shifted.layer(shiftedLayerTile.rect);
-//        visualizeMat(
-//                format("base tile %d, x: %d, y: %d, w: %d, h: %d", tileIndex, baseLayerTile.rect.x, baseLayerTile.rect.y,
-//                       baseLayerTile.rect.width, baseLayerTile.rect.height), baseTileMat);
-//        visualizeMat(
-//                format("shifted tile %d, x: %d, y: %d, w: %d, h: %d", tileIndex, shiftedLayerTile.rect.x,
-//                       shiftedLayerTile.rect.y,
-//                       shiftedLayerTile.rect.width, shiftedLayerTile.rect.height), shiftedTileMat, true);
 
-        for (int x = searchRange.start; x <= searchRange.end; x++) {
-            for (int y = searchRange.start; y < searchRange.end; y++) {
-                if (searchRange.size() > multipleOf && x % multipleOf != 0 && y % multipleOf != 0) {
-                    continue;
-                }
-                doneIterations++;
+        if (useFFT) {
+            auto fftShift = comparePyramidLayerFFT(baseTileMat,
+                                                   shiftedTileMat,
+                                                   prevShiftedLayerTileAlignX,
+                                                   prevShiftedLayerTileAlignY);
+            alignmentShift = fftShift;
+            minAlignmentError = compare(baseTileMat, shiftedTileMat, fftShift.x, fftShift.y);
+        } else {
+            auto tileSearchRange = min(baseLayerTile.rect.width, ALIGN_SEARCH_DISTANCE);
+            searchRange.start = -tileSearchRange;
+            searchRange.end = tileSearchRange;
+            for (int x = searchRange.start; x <= searchRange.end; x++) {
+                for (int y = searchRange.start; y < searchRange.end; y++) {
+                    if (searchRange.size() > multipleOf && x % multipleOf != 0 && y % multipleOf != 0) {
+                        continue;
+                    }
+                    doneIterations++;
 
-                double alignmentError = compare(baseTileMat,
-                                                shiftedTileMat,
-                                                x + prevShiftedLayerTileAlignX,
-                                                y + prevShiftedLayerTileAlignY);
-                if (alignmentError < minAlignmentError) {
-                    minAlignmentError = alignmentError;
-                    alignmentShift.x = x + prevShiftedLayerTileAlignX;
-                    alignmentShift.y = y + prevShiftedLayerTileAlignY;
+                    double alignmentError = compare(baseTileMat,
+                                                    shiftedTileMat,
+                                                    x + prevShiftedLayerTileAlignX,
+                                                    y + prevShiftedLayerTileAlignY);
+                    if (alignmentError < minAlignmentError) {
+                        minAlignmentError = alignmentError;
+                        alignmentShift.x = x + prevShiftedLayerTileAlignX;
+                        alignmentShift.y = y + prevShiftedLayerTileAlignY;
+                    }
                 }
             }
+
         }
 
         shiftedLayerTile.alignmentOffset.x = alignmentShift.x;
@@ -172,28 +189,15 @@ std::vector<Tile> ImageAlign::align(Mat &base, Mat &shifted) {
 
     comparePyramidLayer(shiftedPyramidTop, basePyramidTop, shiftedPyramidTop);
 
-    /* auto initialAlignment = comparePyramidLayerFFT(basePyr[basePyr.size() - 1],
-                                                    shiftedPyr[shiftedPyr.size() - 1],
-                                                    basePyr.size() - 1,
-                                                    xAlignment,
-                                                    yAlignment);*/
-
     for (int layer = basePyr.size() - 2; layer > 0; layer--) { // we do not aligning 0 level layers.. so skipping them.
         auto &baseLayer = basePyr[layer];
         auto &shiftedLayer = shiftedPyr[layer];
         auto &prevShiftedLayer = shiftedPyr[layer + 1];
-        comparePyramidLayer(prevShiftedLayer, baseLayer, shiftedLayer);
-
-        /*Point2d alignOffset = comparePyramidLayerFFT(baseLayer,
-                                                     shiftedLayer,
-                                                     layer,
-                                                     xAlignment,
-                                                     yAlignment);*/
-
+        comparePyramidLayer(prevShiftedLayer, baseLayer, shiftedLayer, layer < 3);
     }
 
     auto &shiftedPyramidLayer1 = shiftedPyr[1];
-    
+
     // interpolate tile align offsets to the final 0 layer
     for (auto &tile : shiftedPyramidLayer1.tiles) {
         tile.alignmentOffset.x *= 2;

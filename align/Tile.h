@@ -10,8 +10,8 @@
 class Tile {
 public:
     cv::Rect2i rect;
-    cv::Point2i alignmentOffset{0, 0};
-    double alignmentError = 0.;
+    cv::Point2d alignmentOffset{0., 0.};
+    double alignmentError{0.};
 
     explicit Tile(cv::Rect2i &rect);
 };

@@ -32,11 +32,6 @@ void PyramidLayer::generateTiles() {
     int tileSize = floor((T_SIZE / tileDownscale));
     printf("tile size %d, downscale %f\n", tileSize, tileDownscale);
 
-    int tileCountX = width / tileSize;
-    int tileCountY = height / tileSize;
-    printf("tile count on axis x=%d, y=%d\n", tileCountX, tileCountY);
-    printf("-----------------------------------\n");
-
     for (int y = 0; y <= height * 2; y++) {
         for (int x = 0; x <= width * 2; x++) {
 
@@ -56,6 +51,9 @@ void PyramidLayer::generateTiles() {
             }
         }
     }
+
+    printf("tile count %zu\n", layerTiles.size());
+    printf("-----------------------------------\n");
 // Visual debugging...
 //    for (int i = 0; i < layerTiles.size(); i++) {
 //        auto tile = layerTiles[i];
