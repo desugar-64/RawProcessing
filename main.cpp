@@ -7,7 +7,7 @@
 using namespace cv;
 
 void processRaw() {
-    Demosaic demosaic("/home/sergeyfitis/raw/flower.dng", "/home/sergeyfitis/raw/bike_orig.jpg");
+    Demosaic demosaic("/home/sergeyfitis/raw/flower.dng", "/home/sergeyfitis/raw/street_orig.jpg");
     demosaic.generateRGBComponents();
     demosaic.interpolateGRBG();
     demosaic.colorize();
@@ -18,27 +18,30 @@ void processRaw() {
 int main() {
 //    processRaw();
     std::cout << "Ok!" << std::endl;
-    Mat base = imread("../align_test/bike_base.png", IMREAD_GRAYSCALE);
-    Mat baseColor = imread("../align_test/bike_base.png", IMREAD_COLOR);
-    Mat shifted = imread("../align_test/bike_shifted.png", IMREAD_GRAYSCALE);
-    Mat shiftedColor = imread("../align_test/bike_shifted.png", IMREAD_COLOR);
+    Mat base = imread("../align_test/street_base.jpg", IMREAD_GRAYSCALE);
+    Mat baseColor = imread("../align_test/street_base.jpg", IMREAD_COLOR);
+    Mat shifted = imread("../align_test/street_shifted.jpg", IMREAD_GRAYSCALE);
+    Mat shiftedColor = imread("../align_test/street_shifted.jpg", IMREAD_COLOR);
     ImageAlign aligner;
-    const Point2d &alignment = aligner.align(base, shifted);
-    auto xAlignment = alignment.x;
-    auto yAlignment = alignment.y;
+    auto tilesOffsets = aligner.align(base, shifted);
 
-    Mat corrected = aligner.translateImg(shiftedColor, xAlignment, yAlignment);
-    namedWindow("corrected", WINDOW_NORMAL);
+    Mat aligned = baseColor.clone();
+    for (auto &tile : tilesOffsets) {
+        if (tile.alignmentError < 6.) {
+            auto tileMat = shiftedColor(tile.rect);
+            Mat shiftCorrectedTile =
+                    ImageAlign::translateImg(tileMat, tile.alignmentOffset.x, tile.alignmentOffset.y) / 2;
+            shiftCorrectedTile.copyTo(aligned(tile.rect));
+        }
+    }
+
     namedWindow("aligned", WINDOW_NORMAL);
-    Mat aligned;
-    addWeighted(baseColor, 0.5, corrected, 0.5, 0, aligned);
     imshow("aligned", aligned);
 
     Mat noAlign;
     addWeighted(baseColor, 0.5, shiftedColor, 0.5, 0, noAlign);
-    imshow("corrected", corrected);
-    imwrite("no_align.png", noAlign);
-    imwrite("align.png", aligned);
+    imwrite("no_align.jpg", noAlign);
+    imwrite("align.jpg", aligned);
 
     cv::waitKey(0);
     return 0;

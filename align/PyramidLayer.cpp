@@ -61,17 +61,17 @@ void PyramidLayer::generateTiles() {
 //        auto tile = layerTiles[i];
 //        rectangle(layer, tile.rect, Scalar(255, 255, 255), 1);
 //    }
-//
-//    auto winName = format("layer %d", number);
-//    namedWindow(winName, WINDOW_NORMAL);
-//    imshow(winName, layer);
-//    Mat lastTile = layer(layerTiles[layerTiles.size() - 1].rect);
-//    Mat firstTile = layer(layerTiles[0].rect);
-//    namedWindow("firstTile", WINDOW_NORMAL);
-//    namedWindow("lastTile", WINDOW_NORMAL);
-//    imshow("lastTile", lastTile);
-//    imshow("firstTile", firstTile);
-//    waitKey(0);
+
+   /* auto winName = format("layer %d", number);
+    namedWindow(winName, WINDOW_NORMAL);
+    imshow(winName, layer);
+    Mat lastTile = layer(layerTiles[layerTiles.size() - 1].rect);
+    Mat firstTile = layer(layerTiles[0].rect);
+    namedWindow("firstTile", WINDOW_NORMAL);
+    namedWindow("lastTile", WINDOW_NORMAL);
+    imshow("lastTile", lastTile);
+    imshow("firstTile", firstTile);
+    waitKey(0);*/
 
     this->tiles = layerTiles;
 }
