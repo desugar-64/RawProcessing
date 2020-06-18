@@ -1,0 +1,4 @@
+/home/sergeyfitis/dev/soft/clion-2020.1.1/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=MinSizeRel -G "CodeBlocks - Unix Makefiles" /home/sergeyfitis/dev/cpp-projects/RawProcessing
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-minsizerel

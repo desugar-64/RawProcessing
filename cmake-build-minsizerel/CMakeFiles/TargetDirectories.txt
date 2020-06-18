@@ -1,0 +1,4 @@
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-minsizerel/CMakeFiles/rebuild_cache.dir
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-minsizerel/CMakeFiles/RawProcessing.dir
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-minsizerel/CMakeFiles/edit_cache.dir
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-minsizerel/CMakeFiles/main.dir

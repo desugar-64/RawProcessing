@@ -7,7 +7,7 @@
 using namespace cv;
 
 void processRaw() {
-    Demosaic demosaic("/home/sergeyfitis/raw/street.dng", "/home/sergeyfitis/raw/street_orig.jpg");
+    Demosaic demosaic("/home/sergeyfitis/raw/day.dng", "/home/sergeyfitis/raw/day_orig.jpg");
     demosaic.generateRGBComponents();
     demosaic.interpolateGRBG();
     demosaic.colorize();
@@ -18,10 +18,10 @@ void processRaw() {
 int main() {
 //    processRaw();
     std::cout << "Ok!" << std::endl;
-    Mat base = imread("../align_test/street_base.jpg", IMREAD_GRAYSCALE);
-    Mat baseColor = imread("../align_test/street_base.jpg", IMREAD_COLOR);
-    Mat shifted = imread("../align_test/street_shifted.jpg", IMREAD_GRAYSCALE);
-    Mat shiftedColor = imread("../align_test/street_shifted.jpg", IMREAD_COLOR);
+    Mat base = imread("../align_test/day_base.jpg", IMREAD_GRAYSCALE);
+    Mat baseColor = imread("../align_test/day_base.jpg", IMREAD_COLOR);
+    Mat shifted = imread("../align_test/day_shifted.jpg", IMREAD_GRAYSCALE);
+    Mat shiftedColor = imread("../align_test/day_shifted.jpg", IMREAD_COLOR);
 
     Mat noAlign;
     addWeighted(baseColor, 0.5, shiftedColor, 0.5, 0, noAlign);
@@ -38,7 +38,7 @@ int main() {
     Mat aligned = baseColor.clone();
     int tileIdx = 0;
     for (auto &tile : tilesOffsets) {
-        if (tile.alignmentError <= 5.) {
+        if (tile.alignmentError <= 4.) {
             auto tileMat = shiftedColor(tile.rect).clone();
             Mat shiftCorrectedTile =
                     ImageAlign::translateImg(tileMat, tile.alignmentOffset.x, tile.alignmentOffset.y) / 2;
