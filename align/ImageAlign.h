@@ -19,6 +19,7 @@
 #include "opencv2/opencv.hpp"
 #include "Tile.h"
 #include "PyramidLayer.h"
+#include "iostream"
 
 class ImageAlign {
 private:
@@ -45,6 +46,17 @@ private:
         cv::imshow(windowName, mat);
         if (waitKey) {
             cv::waitKey();
+        }
+    }
+
+    static void dumpLayer(PyramidLayer &layer) {
+        cv::imwrite(cv::format("pyr/layer_%d.png", layer.number), layer.layer);
+        int tileIdx;
+        for (auto &tile : layer.tiles) {
+            if (tileIdx % 1000 == 0) {
+                cv::imwrite(cv::format("tiles/tile_%d.png", tileIdx), layer.layer(tile.rect));
+            }
+            tileIdx++;
         }
     }
 

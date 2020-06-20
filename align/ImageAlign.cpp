@@ -20,6 +20,7 @@ std::vector<PyramidLayer> ImageAlign::gaussianPyramid(cv::Mat &base) {
         layerN.generateTiles();
         pyramid.push_back(layerN);
     }
+//    dumpLayer(pyramid[0]);
 //    for (int i = 0; i < pyramid.size(); i++) {
 //        Mat mat = pyramid[i];
 //        const String window = format("layer%d, (%d)x(%d)", i, mat.cols, mat.rows);
@@ -72,7 +73,6 @@ double ImageAlign::compare(Mat &base, Mat &other, double xOffset, double yOffset
 
     Mat diff;
     absdiff(base, compare, diff);
-    diff = abs(base - compare);
 //    namedWindow("diff", WINDOW_NORMAL);
 //    imshow("diff", diff);
     auto meanValue = mean(diff);
@@ -179,6 +179,11 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
 
 std::vector<Tile> ImageAlign::align(Mat &base, Mat &shifted) {
     auto start = std::chrono::high_resolution_clock::now();
+
+//    Canny(base, base, 15, 50);
+//    Canny(shifted, shifted, 15, 50);
+//
+//    visualizeMat("base", base, true);
 
     auto basePyr = gaussianPyramid(base);
     auto shiftedPyr = gaussianPyramid(shifted);
