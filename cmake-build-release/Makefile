@@ -256,6 +256,36 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+merge/ImageMerge.o: merge/ImageMerge.cpp.o
+
+.PHONY : merge/ImageMerge.o
+
+# target to build an object file
+merge/ImageMerge.cpp.o:
+	$(MAKE) -f CMakeFiles/RawProcessing.dir/build.make CMakeFiles/RawProcessing.dir/merge/ImageMerge.cpp.o
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/merge/ImageMerge.cpp.o
+.PHONY : merge/ImageMerge.cpp.o
+
+merge/ImageMerge.i: merge/ImageMerge.cpp.i
+
+.PHONY : merge/ImageMerge.i
+
+# target to preprocess a source file
+merge/ImageMerge.cpp.i:
+	$(MAKE) -f CMakeFiles/RawProcessing.dir/build.make CMakeFiles/RawProcessing.dir/merge/ImageMerge.cpp.i
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/merge/ImageMerge.cpp.i
+.PHONY : merge/ImageMerge.cpp.i
+
+merge/ImageMerge.s: merge/ImageMerge.cpp.s
+
+.PHONY : merge/ImageMerge.s
+
+# target to generate assembly for a file
+merge/ImageMerge.cpp.s:
+	$(MAKE) -f CMakeFiles/RawProcessing.dir/build.make CMakeFiles/RawProcessing.dir/merge/ImageMerge.cpp.s
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/merge/ImageMerge.cpp.s
+.PHONY : merge/ImageMerge.cpp.s
+
 raw/Demosaic.o: raw/Demosaic.cpp.o
 
 .PHONY : raw/Demosaic.o
@@ -338,6 +368,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... merge/ImageMerge.o"
+	@echo "... merge/ImageMerge.i"
+	@echo "... merge/ImageMerge.s"
 	@echo "... raw/Demosaic.o"
 	@echo "... raw/Demosaic.i"
 	@echo "... raw/Demosaic.s"

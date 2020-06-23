@@ -154,6 +154,14 @@
 			<Option target="RawProcessing"/>
 			<Option target="main"/>
 		</Unit>
+		<Unit filename="/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.cpp">
+			<Option target="RawProcessing"/>
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.h">
+			<Option target="RawProcessing"/>
+			<Option target="main"/>
+		</Unit>
 		<Unit filename="/home/sergeyfitis/dev/cpp-projects/RawProcessing/raw/CfaPattern.h">
 			<Option target="RawProcessing"/>
 			<Option target="main"/>

@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/PyramidLayer.cpp" "/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir/align/PyramidLayer.cpp.o"
   "/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/Tile.cpp" "/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir/align/Tile.cpp.o"
   "/home/sergeyfitis/dev/cpp-projects/RawProcessing/main.cpp" "/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir/main.cpp.o"
+  "/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.cpp" "/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir/merge/ImageMerge.cpp.o"
   "/home/sergeyfitis/dev/cpp-projects/RawProcessing/raw/Demosaic.cpp" "/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir/raw/Demosaic.cpp.o"
   "/home/sergeyfitis/dev/cpp-projects/RawProcessing/raw/filter/FilterGRBG.cpp" "/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir/raw/filter/FilterGRBG.cpp.o"
   )

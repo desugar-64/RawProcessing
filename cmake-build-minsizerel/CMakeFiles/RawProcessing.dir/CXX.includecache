@@ -6,6 +6,12 @@
 
 #IncludeRegexTransform: 
 
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.cpp
+opencv2/imgproc/types_c.h
+-
+ImageAlign.h
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.h
+
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.h
 opencv2/opencv.hpp
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/align/opencv2/opencv.hpp
