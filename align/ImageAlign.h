@@ -61,7 +61,7 @@ private:
     }
 
 public:
-    static cv::Mat translateImg(cv::Mat &img, int xOffset, int yOffset);
+    static cv::Mat translateImg(cv::Mat &img, double xOffset, double yOffset);
 
     std::vector<Tile> align(cv::Mat &base, cv::Mat &shifted);
 };

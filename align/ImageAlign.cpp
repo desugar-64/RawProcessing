@@ -30,7 +30,7 @@ std::vector<PyramidLayer> ImageAlign::gaussianPyramid(cv::Mat &base) {
     return pyramid;
 }
 
-cv::Mat ImageAlign::translateImg(Mat &img, int xOffset, int yOffset) {
+cv::Mat ImageAlign::translateImg(Mat &img, double xOffset, double yOffset) {
     Mat out;
     Mat transMat = (Mat_<double>(2, 3) << 1, 0, xOffset, 0, 1, yOffset);
     warpAffine(img, out, transMat, img.size(), CV_INTER_LINEAR, BORDER_CONSTANT, Scalar());
@@ -68,15 +68,17 @@ double ImageAlign::compare(Mat &base, Mat &other, double xOffset, double yOffset
     assert(other.channels() == 1);
 
     auto compare = translateImg(other, xOffset, yOffset);
+//    namedWindow("base", WINDOW_NORMAL);
 //    namedWindow("compare", WINDOW_NORMAL);
 //    imshow("compare", compare);
+//    imshow("base", base);
 
     Mat diff;
     absdiff(base, compare, diff);
 //    namedWindow("diff", WINDOW_NORMAL);
 //    imshow("diff", diff);
     auto meanValue = mean(diff);
-//    waitKey(0);
+//    waitKey(4);
     return sum(meanValue).val[0];
 }
 
@@ -121,7 +123,6 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
     int tilePixelStep = COMPARE_EVERY_N_PIXEL;
 
     Range searchRange(-ALIGN_SEARCH_DISTANCE, ALIGN_SEARCH_DISTANCE);
-
     for (int tileIndex = 0; tileIndex < base.tiles.size(); tileIndex++) {
         auto &previousShiftedLayerTile = previousShiftedLayer.tiles[tileIndex];
         auto &baseLayerTile = base.tiles[tileIndex];
@@ -147,11 +148,8 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
             auto tileSearchRange = min(baseLayerTile.rect.width, ALIGN_SEARCH_DISTANCE);
             searchRange.start = -tileSearchRange;
             searchRange.end = tileSearchRange;
-            for (int x = searchRange.start; x <= searchRange.end; x++) {
-                for (int y = searchRange.start; y < searchRange.end; y++) {
-                    if (searchRange.size() > tilePixelStep && x % tilePixelStep != 0 && y % tilePixelStep != 0) {
-                        continue;
-                    }
+            for (int x = searchRange.start; x <= searchRange.end; x += tilePixelStep) {
+                for (int y = searchRange.start; y < searchRange.end; y += tilePixelStep) {
                     doneIterations++;
 
                     double alignmentError = compare(baseTileMat,
@@ -159,6 +157,7 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
                                                     x + prevShiftedLayerTileAlignX,
                                                     y + prevShiftedLayerTileAlignY);
                     if (alignmentError < minAlignmentError) {
+//                        printf("new min minAlignmentError=%f\n", minAlignmentError);
                         minAlignmentError = alignmentError;
                         alignmentShift.x = x + prevShiftedLayerTileAlignX;
                         alignmentShift.y = y + prevShiftedLayerTileAlignY;

@@ -5,8 +5,8 @@
 #ifndef RAWPROCESSING_IMAGEMERGE_H
 #define RAWPROCESSING_IMAGEMERGE_H
 
-#define ALIGNMENT_PRECISION 2.4
-#define DEBUG_TILES true
+#define ALIGNMENT_PRECISION 3.0
+#define DEBUG_TILES false
 
 #include "opencv2/opencv.hpp"
 #include "../align/Tile.h"
