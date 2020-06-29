@@ -150,6 +150,14 @@
 			<Option target="RawProcessing"/>
 			<Option target="main"/>
 		</Unit>
+		<Unit filename="/home/sergeyfitis/dev/cpp-projects/RawProcessing/input/ImageReader.cpp">
+			<Option target="RawProcessing"/>
+			<Option target="main"/>
+		</Unit>
+		<Unit filename="/home/sergeyfitis/dev/cpp-projects/RawProcessing/input/ImageReader.h">
+			<Option target="RawProcessing"/>
+			<Option target="main"/>
+		</Unit>
 		<Unit filename="/home/sergeyfitis/dev/cpp-projects/RawProcessing/main.cpp">
 			<Option target="RawProcessing"/>
 			<Option target="main"/>

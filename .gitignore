@@ -34,3 +34,5 @@
 /cmake-build-debug
 /cmake-build-minsizerel
 /cmake-build-release
+/burst0
+/burst1

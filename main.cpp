@@ -5,6 +5,8 @@
 #include "align/ImageAlign.h"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/imgcodecs.hpp"
+#include "input/ImageReader.h"
+#include "merge/ImageMerge.h"
 
 void mergeAveraged(cv::Mat &base, cv::Mat &aligned);
 
@@ -24,12 +26,46 @@ void processRaw() {
 int main() {
 //    processRaw();
     std::cout << "Ok!" << std::endl;
-    Mat base = imread("../align_test/plane_base.jpg", IMREAD_GRAYSCALE);
-    Mat baseColor = imread("../align_test/plane_base.jpg", IMREAD_COLOR);
-    Mat shifted = imread("../align_test/plane_shifted.jpg", IMREAD_GRAYSCALE);
-    Mat shiftedColor = imread("../align_test/plane_shifted.jpg", IMREAD_COLOR);
+//    Mat base = imread("../align_test/plane_base.jpg", IMREAD_GRAYSCALE);
+//    Mat baseColor = imread("../align_test/plane_base.jpg", IMREAD_COLOR);
+//    Mat shifted = imread("../align_test/plane_shifted.jpg", IMREAD_GRAYSCALE);
+//    Mat shiftedColor = imread("../align_test/plane_shifted.jpg", IMREAD_COLOR);
 
-    Mat noAlign;
+    ImageAlign aligner;
+    ImageMerge merger;
+
+    std::vector<cv::Mat> shots = ImageReader::readFolder("../burst1", 9);
+    assert(!shots.empty());
+    auto &baseShot = shots[0]; // TODO: find the less blurry shot
+    Mat baseGrey;
+    cvtColor(baseShot, baseGrey, CV_BGR2GRAY);
+
+    std::map<int, std::vector<Tile>> shotAlignments;
+    Mat shotGrey(baseGrey.rows, baseGrey.cols, baseGrey.type());
+
+    Mat noAlign = baseShot.clone();
+
+    for (auto &shotShifted : shots) {
+        addWeighted(noAlign, 0.5, shotShifted, 0.5, 0, noAlign);
+    }
+
+    imwrite("no_align.png", noAlign);
+
+    for (int shotIdx = 1; shotIdx < shots.size(); shotIdx++) {
+        printf("\n\n\n------------------------------------\n");
+        printf("processing %d frame of %lu\n", shotIdx, shots.size() - 1);
+        auto &shotShifted = shots[shotIdx];
+        cvtColor(shotShifted, shotGrey, CV_BGR2GRAY);
+        auto shotShiftOffsets = aligner.align(baseGrey, shotGrey);
+        shotAlignments[shotIdx] = shotShiftOffsets;
+    }
+
+    printf("\n------------------------------------\n");
+    Mat merged = merger.mergeBurst(baseShot, shots, shotAlignments);
+
+    imwrite("aligned.png", merged);
+
+    /*Mat noAlign;
     addWeighted(baseColor, 0.5, shiftedColor, 0.5, 0, noAlign);
     imwrite("no_align.png", noAlign);
 
@@ -38,7 +74,6 @@ int main() {
     baseColor.convertTo(baseColor, CV_8UC4);
     shiftedColor.convertTo(shiftedColor, CV_8UC4);
 
-    ImageAlign aligner;
     auto tilesOffsets = aligner.align(base, shifted);
 
     Mat aligned = baseColor.clone();
@@ -59,7 +94,7 @@ int main() {
     Rect roi = Rect(2400, 2000, 400, 400);
 
     imwrite("align_.png", aligned(roi));
-    imwrite("base_.png", baseColor(roi));
+    imwrite("base_.png", baseColor(roi));*/
 //    namedWindow("aligned", WINDOW_NORMAL);
 //    imshow("aligned", aligned);
 
@@ -69,41 +104,6 @@ int main() {
 }
 
 void applyMask(Mat &mat) {
-    const double mask[32][32] = {
-            {.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .2, .2, .1, .1, .1},
-            {.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .3, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .1, .1},
-            {.1, .1, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .2, .1, .1},
-            {.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .2, .2, .1, .1, .1},
-            {.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .2, .2, .1, .1},
-
-    };
 
     const auto fileMask = imread("../tile_mask.png", IMREAD_GRAYSCALE);
 //    namedWindow("f_mask", WINDOW_NORMAL);

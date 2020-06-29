@@ -226,6 +226,36 @@ align/Tile.cpp.s:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/align/Tile.cpp.s
 .PHONY : align/Tile.cpp.s
 
+input/ImageReader.o: input/ImageReader.cpp.o
+
+.PHONY : input/ImageReader.o
+
+# target to build an object file
+input/ImageReader.cpp.o:
+	$(MAKE) -f CMakeFiles/RawProcessing.dir/build.make CMakeFiles/RawProcessing.dir/input/ImageReader.cpp.o
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input/ImageReader.cpp.o
+.PHONY : input/ImageReader.cpp.o
+
+input/ImageReader.i: input/ImageReader.cpp.i
+
+.PHONY : input/ImageReader.i
+
+# target to preprocess a source file
+input/ImageReader.cpp.i:
+	$(MAKE) -f CMakeFiles/RawProcessing.dir/build.make CMakeFiles/RawProcessing.dir/input/ImageReader.cpp.i
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input/ImageReader.cpp.i
+.PHONY : input/ImageReader.cpp.i
+
+input/ImageReader.s: input/ImageReader.cpp.s
+
+.PHONY : input/ImageReader.s
+
+# target to generate assembly for a file
+input/ImageReader.cpp.s:
+	$(MAKE) -f CMakeFiles/RawProcessing.dir/build.make CMakeFiles/RawProcessing.dir/input/ImageReader.cpp.s
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input/ImageReader.cpp.s
+.PHONY : input/ImageReader.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -365,6 +395,9 @@ help:
 	@echo "... align/Tile.o"
 	@echo "... align/Tile.i"
 	@echo "... align/Tile.s"
+	@echo "... input/ImageReader.o"
+	@echo "... input/ImageReader.i"
+	@echo "... input/ImageReader.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

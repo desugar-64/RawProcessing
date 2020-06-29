@@ -118,7 +118,7 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
     std::printf("comparePyramidLayer=%d, %dx%d, useFFT=%d\n", base.number, base.layer.cols, base.layer.rows, useFFT);
     Point2d alignmentShift(maxDouble, maxDouble);
     int doneIterations = 0;
-    int multipleOf = COMPARE_EVERY_N_PIXEL;
+    int tilePixelStep = COMPARE_EVERY_N_PIXEL;
 
     Range searchRange(-ALIGN_SEARCH_DISTANCE, ALIGN_SEARCH_DISTANCE);
 
@@ -149,7 +149,7 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
             searchRange.end = tileSearchRange;
             for (int x = searchRange.start; x <= searchRange.end; x++) {
                 for (int y = searchRange.start; y < searchRange.end; y++) {
-                    if (searchRange.size() > multipleOf && x % multipleOf != 0 && y % multipleOf != 0) {
+                    if (searchRange.size() > tilePixelStep && x % tilePixelStep != 0 && y % tilePixelStep != 0) {
                         continue;
                     }
                     doneIterations++;

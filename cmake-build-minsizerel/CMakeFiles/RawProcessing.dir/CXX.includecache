@@ -6,12 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.cpp
-opencv2/imgproc/types_c.h
--
-ImageAlign.h
-/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.h
-
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.h
 opencv2/opencv.hpp
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/align/opencv2/opencv.hpp
@@ -32,6 +26,10 @@ Tile.h
 opencv2/opencv.hpp
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/align/opencv2/opencv.hpp
 
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/input/ImageReader.h
+opencv2/opencv.hpp
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/input/opencv2/opencv.hpp
+
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/main.cpp
 opencv2/highgui/highgui_c.h
 -
@@ -47,6 +45,22 @@ opencv2/imgproc.hpp
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/opencv2/imgproc.hpp
 opencv2/imgcodecs.hpp
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/opencv2/imgcodecs.hpp
+input/ImageReader.h
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/input/ImageReader.h
+merge/ImageMerge.h
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.h
+
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.cpp
+ImageMerge.h
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.h
+../align/ImageAlign.h
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/ImageAlign.h
+
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/ImageMerge.h
+opencv2/opencv.hpp
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/merge/opencv2/opencv.hpp
+../align/Tile.h
+/home/sergeyfitis/dev/cpp-projects/RawProcessing/align/Tile.h
 
 /home/sergeyfitis/dev/cpp-projects/RawProcessing/raw/CfaPattern.h
 
