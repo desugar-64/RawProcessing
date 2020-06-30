@@ -52,7 +52,7 @@ ImageMerge::mergeBurst(Mat &base, std::vector<cv::Mat> burst, std::map<int, std:
     Mat merged = base.clone();
     for (int shotIdx = 1; shotIdx < burst.size(); shotIdx++) {
         printf("merging %d frame of %lu\n", shotIdx, burst.size() - 1);
-
+//        Mat merged(base.rows, base.cols, base.type());
         auto &shot = burst[shotIdx];
         auto &tiles = alignmentOffsets[shotIdx];
         for (auto &tile : tiles) {
@@ -65,6 +65,7 @@ ImageMerge::mergeBurst(Mat &base, std::vector<cv::Mat> burst, std::map<int, std:
                 mergeAveraged(mergeTileMat, mergeTileMatCopy, shiftCorrectedTile, burst.size());
             }
         }
+//        imwrite(format("frame_%d.png", shotIdx), merged);
     }
     return merged;
 }

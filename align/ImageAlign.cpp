@@ -78,7 +78,7 @@ double ImageAlign::compare(Mat &base, Mat &other, double xOffset, double yOffset
 //    namedWindow("diff", WINDOW_NORMAL);
 //    imshow("diff", diff);
     auto meanValue = mean(diff);
-//    waitKey(4);
+//    waitKey(0);
     return sum(meanValue).val[0];
 }
 

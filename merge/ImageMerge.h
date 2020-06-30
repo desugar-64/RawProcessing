@@ -5,7 +5,7 @@
 #ifndef RAWPROCESSING_IMAGEMERGE_H
 #define RAWPROCESSING_IMAGEMERGE_H
 
-#define ALIGNMENT_PRECISION 3.0
+#define ALIGNMENT_PRECISION 2.5
 #define DEBUG_TILES false
 
 #include "opencv2/opencv.hpp"

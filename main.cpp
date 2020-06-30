@@ -34,7 +34,7 @@ int main() {
     ImageAlign aligner;
     ImageMerge merger;
 
-    std::vector<cv::Mat> shots = ImageReader::readFolder("../burst2", 6);
+    std::vector<cv::Mat> shots = ImageReader::readFolder("../burst3", 16);
     assert(!shots.empty());
     auto &baseShot = shots[0]; // TODO: find the less blurry shot
     Mat baseGrey;
