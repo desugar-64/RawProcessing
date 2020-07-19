@@ -1,4 +1,4 @@
-#include <opencv2/highgui/highgui_c.h>
+#include "opencv2/highgui/highgui_c.h"
 #include "opencv2/highgui.hpp"
 #include "iostream"
 #include "raw/Demosaic.h"
@@ -8,19 +8,15 @@
 #include "input/ImageReader.h"
 #include "merge/ImageMerge.h"
 
-void mergeAveraged(cv::Mat &base, cv::Mat &aligned);
-
-void applyMask(cv::Mat &mat);
-
 using namespace cv;
 
 void processRaw() {
-    Demosaic demosaic("/home/sergeyfitis/raw/plane.dng", "/home/sergeyfitis/raw/plane_orig.jpg");
-    demosaic.generateRGBComponents();
-    demosaic.interpolateGRBG();
-    demosaic.colorize();
-    demosaic.squaredDifference();
-    demosaic.display();
+    // Demosaic demosaic("/home/sergeyfitis/raw/plane.dng", "/home/sergeyfitis/raw/plane_orig.jpg");
+    // demosaic.generateRGBComponents();
+    // demosaic.interpolateGRBG();
+    // demosaic.colorize();
+    // demosaic.squaredDifference();
+    // demosaic.display();
 }
 
 int main() {
@@ -34,7 +30,7 @@ int main() {
     ImageAlign aligner;
     ImageMerge merger;
 
-    std::vector<cv::Mat> shots = ImageReader::readFolder("../burst3", 16);
+    std::vector<cv::Mat> shots = ImageReader::readFolder("burst3", 3);
     assert(!shots.empty());
     auto &baseShot = shots[0]; // TODO: find the less blurry shot
     Mat baseGrey;
@@ -103,42 +99,4 @@ int main() {
     return 0;
 }
 
-void applyMask(Mat &mat) {
-
-    const auto fileMask = imread("../tile_mask.png", IMREAD_GRAYSCALE);
-//    namedWindow("f_mask", WINDOW_NORMAL);
-//    imshow("f_mask", fileMask);
-//    waitKey();
-    fileMask.convertTo(fileMask, CV_8UC1);
-
-    for (int y = 0; y < mat.rows; y++) {
-        for (int x = 0; x < mat.cols; x++) {
-            auto &pixels = mat.at<Vec4b>(y, x);
-            auto &maskPixel = fileMask.at<ushort>(y, x);
-//            pixels[3] *= mask[y][x];
-            pixels[3] *= (65535 - maskPixel) / 65535.;
-        }
-    }
-//    imwrite("tiles/tile_a.png", mat);
-//    namedWindow("mask", WINDOW_NORMAL);
-//    imshow("mask", mat);
-//    waitKey();
-}
-
-void mergeAveraged(Mat &base, Mat &aligned) {
-    for (int y = 0; y < base.rows; y++) {
-        for (int x = 0; x < base.cols; x++) {
-            auto &alignedPixels = aligned.at<Vec4b>(y, x);
-            auto &basePixels = base.at<Vec4b>(y, x);
-
-            bool isTransparent = alignedPixels[3] != 255;
-
-            basePixels[0] = isTransparent ? basePixels[0] : (basePixels[0] + alignedPixels[0]) / 2; // B
-            basePixels[1] = isTransparent ? basePixels[1] : (basePixels[1] + alignedPixels[1]) / 2; // G
-            basePixels[2] = isTransparent ? basePixels[2] : (basePixels[2] + alignedPixels[2]) / 2; // R
-//            basePixels[2] = isTransparent ? basePixels[2] : (basePixels[2] + alignedPixels[2]); // R
-            basePixels[3] = 255;                                                                    // A
-        }
-    }
-}
 

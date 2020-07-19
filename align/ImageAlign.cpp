@@ -124,6 +124,11 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
 
     Range searchRange(-ALIGN_SEARCH_DISTANCE, ALIGN_SEARCH_DISTANCE);
     for (int tileIndex = 0; tileIndex < base.tiles.size(); tileIndex++) {
+        // Need to extract 9x9 tile matrix and compare the given shiftedLayerTile with it
+        // t0 t1 t2
+        // t3 t4 t5   <=== t'0
+        // t6 t7 t8
+
         auto &previousShiftedLayerTile = previousShiftedLayer.tiles[tileIndex];
         auto &baseLayerTile = base.tiles[tileIndex];
         auto &shiftedLayerTile = shifted.tiles[tileIndex];
@@ -145,7 +150,7 @@ void ImageAlign::comparePyramidLayer(PyramidLayer &previousShiftedLayer,
             alignmentShift = fftShift;
             minAlignmentError = compare(baseTileMat, shiftedTileMat, fftShift.x, fftShift.y);
         } else {
-            auto tileSearchRange = min(baseLayerTile.rect.width, ALIGN_SEARCH_DISTANCE);
+            auto tileSearchRange = min(baseLayerTile.rect.width - 1, ALIGN_SEARCH_DISTANCE);
             searchRange.start = -tileSearchRange;
             searchRange.end = tileSearchRange;
             for (int x = searchRange.start; x <= searchRange.end; x += tilePixelStep) {

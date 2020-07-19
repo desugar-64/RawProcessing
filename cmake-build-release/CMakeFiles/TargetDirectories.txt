@@ -1,4 +1,0 @@
-/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/rebuild_cache.dir
-/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/RawProcessing.dir
-/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/edit_cache.dir
-/home/sergeyfitis/dev/cpp-projects/RawProcessing/cmake-build-release/CMakeFiles/main.dir
